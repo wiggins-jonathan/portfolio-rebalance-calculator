@@ -17,6 +17,15 @@ stocks = input('Enter ticker symbols:\n')
  5). Some other ways I can't think of right now
 '''
 # Print closing price
-df = web.DataReader(stocks, 'stooq')
-close = (df.loc[now, 'Close'])
-print(close)
+#df = web.DataReader(stocks, 'stooq')
+#close = (df.loc[now, 'Close'])
+#print(close)
+
+def get_close_price(stocks):
+    stocks = stocks.split(', ')
+    for stock in stocks:
+        df = web.DataReader(stocks, 'stooq')
+        close = (df.loc[now, 'Close'])
+        print(close)
+
+get_close_price(stocks)
