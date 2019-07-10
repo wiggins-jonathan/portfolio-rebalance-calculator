@@ -2,9 +2,10 @@ import pandas_datareader.data as web
 from datetime import datetime as dt
 
 # Get current time
-date = dt.now()
+pretty_date = '%Y-%m-%d'
+now         = (dt.now().strftime(pretty_date))
 
-print('Enter security ticker symbols')
+stocks = input('Enter ticker symbols:\n')
 '''
  We need to decide how to parse user input here
  A few ways we could do this:
@@ -15,9 +16,7 @@ print('Enter security ticker symbols')
     specifying a anything
  5). Some other ways I can't think of right now
 '''
-stocks = input()
-
-# The 'iex' API is forbidden. It's either deprecated or we need an API key.
-# Get a key, or find a suitable subsitute. Until then, the following code bails:
-df = web.DataReader(stocks, 'iex', date, date)
-print(df)
+# Print closing price
+df = web.DataReader(stocks, 'stooq')
+close = (df.loc[now, 'Close'])
+print(close)
