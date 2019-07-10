@@ -23,9 +23,8 @@ stocks = input('Enter ticker symbols:\n')
 
 def get_close_price(stocks):
     stocks = stocks.split(', ')
-    for stock in stocks:
-        df = web.DataReader(stocks, 'stooq')
-        close = (df.loc[now, 'Close'])
-        print(close)
+    df = web.DataReader(stocks, 'stooq')
+    close = (df.loc[now, 'Close'])
+    print(close)
 
 get_close_price(stocks)
