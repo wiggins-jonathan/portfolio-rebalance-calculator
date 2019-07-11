@@ -11,7 +11,7 @@ with open(secrets_file, 'r') as f:
     try:
         api = yaml.safe_load(f)
         key = api['alpha_vantage']['api_key']
-    except yaml.YAMLERROR as yaml_error:
+    except yaml.YAMLError as yaml_error:
         print(yaml_error)
 
 stocks = input('Enter ticker symbols:\n')
