@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import yaml
 import pandas_datareader    as web
 from pathlib    import Path as path
