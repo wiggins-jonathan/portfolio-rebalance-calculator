@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import yaml
-import pandas_datareader    as web
-from pathlib    import Path as path
+import  yaml
+import  argparse
+import  pandas_datareader   as web
+from    pathlib import Path as path
 
 # Get paths
 rel_path        = path(__file__).parent
@@ -15,6 +16,18 @@ with open(secrets_file, 'r') as f:
         key = api['alpha_vantage']['api_key']
     except yaml.YAMLError as yaml_error:
         print(yaml_error)
+
+# Create arguments object named arguments
+arguments = argparse.ArgumentParser()
+
+# Define arguments & add to the object
+arguments.add_argument(
+    "assets",
+    help = "A list of assets",
+    )
+
+# Parse argparse object
+arguments.parse_args()
 
 stocks = input('Enter ticker symbols:\n')
 '''
