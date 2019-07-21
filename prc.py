@@ -17,17 +17,72 @@ with open(secrets_file, 'r') as f:
     except yaml.YAMLError as yaml_error:
         print(yaml_error)
 
-# Create arguments object named arguments
-arguments = argparse.ArgumentParser()
+# Instantiate argparse object
+parse = argparse.ArgumentParser()
 
-# Define arguments & add to the object
-arguments.add_argument(
-    "assets",
-    help = "A list of assets",
-    )
+#
+## Args
+#
 
-# Parse argparse object
-arguments.parse_args()
+# Add total amount to be rebalanced
+parse.add_argument(
+    "-t",
+    "--total",
+    action      = "store",
+    type        = int,
+    required    = True,
+    metavar     = "[Total]",
+    help        = "Total amount to be rebalanced."
+)
+
+# Add Assets
+parse.add_argument(
+    "-a",       # This is the short option
+    "--assets", # This is the long option
+    action      = "append",
+    type        = str,
+    required    = True,
+    metavar     = "[Assets]",
+    # You'll probably want to separate them by commas when passed to a function.
+    help        = "List assets to be balanced."
+)
+# Add Amounts
+parse.add_argument(
+    "-$",
+    "--amounts",
+    action      = "append",
+    type        = int,
+    required    = True,
+    metavar     = "[Amounts]",
+    help        = "List amounts of each asset to be balanced"
+)
+
+# Add target allocation
+parse.add_argument(
+    "-%",
+    "--percentages",
+    action      = "append",
+    type        = int,
+    required    = True,
+    metavar     = "[Percentages]",
+    help        = "List desired percentages to rebalance into porfolio."
+)
+
+# Parse file if argument given. This will be more complicated & must use nargs
+parse.add_argument(
+    "-f",
+    "--file",
+    required    = False,
+    metavar     = "[File]",
+    help        = "File to parse. Expand this help text later."
+)
+
+# Parse args
+parse.parse_args()
+
+#
+## End args
+#
 
 stocks = input('Enter ticker symbols:\n')
 '''
