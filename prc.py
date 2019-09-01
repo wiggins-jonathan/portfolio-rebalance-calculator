@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-#I like these examples much better. I'll get started on giving them functionality soon.
-#These messages are my only changes thus far.
-
 import  yaml
 import  argparse
 import  pandas_datareader   as web
@@ -40,8 +37,8 @@ parse.add_argument(
 
 # Add Assets
 parse.add_argument(
-    "-a",       
-    "--assets", 
+    "-a",
+    "--assets",
     action      = "append",
     type        = str,
     required    = True,
