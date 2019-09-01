@@ -88,22 +88,11 @@ parse.parse_args()
 #
 
 stocks = input('Enter ticker symbols:\n')
-'''
- We need to decide how to parse user input here.
- A few ways we could do this in rising levels of difficulty:
-    1). Split on delimmiter <- We are doing this now using a comma. It sucks & is lazy
-    2). Ask user how many tickers they need. Take in n tickers. This kind of sucks,
-       But would work quickly.
-    4). Loop through multiple inputs & take in n tickers until we get a null ticker,
-       (the user hits enter without specifying anything)
-    5). We take in command line arguments using the argparse module.
-    6). We create an ncurses TUI
-    7). We create a webapp
-'''
 
 def get_close_price(stocks):
     stocks = stocks.split(', ')
     df = web.av.quotes.AVQuotesReader(symbols=stocks, api_key=key)
     print(df.read())
 
-get_close_price(stocks)
+if __name__ == "__main__":
+    get_close_price(stocks)
