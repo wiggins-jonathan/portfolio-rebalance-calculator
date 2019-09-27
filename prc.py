@@ -18,16 +18,56 @@ with open(secrets_file, 'r') as f:
         print(yaml_error)
 
 # Instantiate argparse object
-parse = argparse.ArgumentParser()
+parse = argparse.ArgumentParser(
+    description = 'Program to rebalance a securities portfolio.'
+    )
 
 #
 ## Args
 #
 
-# Add total amount to be rebalanced
 parse.add_argument(
-    "-t",
-    "--total",
+    "-a", "--assets",
+    action      = "append",
+    type        = str,
+    required    = True,
+    metavar     = "[Assets]",
+    nargs       = "+",
+    help        = "List ticker number of assets to be balanced."
+                    " Separate multiple tickers by spaces"
+)
+parse.add_argument(
+    "-$", "--amounts",
+    action      = "append",
+    type        = int,
+    required    = True,
+    metavar     = "[Amounts]",
+    nargs       = "+",
+    help        = "List amounts of each asset to be balanced"
+)
+
+parse.add_argument(
+    "-%", "--percentages",
+    action      = "append",
+    type        = int,
+    required    = True,
+    metavar     = "[Percentages]",
+    nargs       = "+",
+    help        = "List desired percentages to rebalance into porfolio."
+)
+
+# Parse file if argument given. This will be more complicated & will be done later
+parse.add_argument(
+    "-f", "--file",
+    action      = "append",
+    type        = str,
+    required    = False,
+    metavar     = "[File]",
+    help        = "A file with arguments to parse"
+)
+
+parse.add_argument(
+    "-t", "--total",
     action      = "store",
     type        = int,
     required    = True,
@@ -35,64 +75,21 @@ parse.add_argument(
     help        = "Total amount to be rebalanced."
 )
 
-# Add Assets
-parse.add_argument(
-    "-a",
-    "--assets",
-    action      = "append",
-    type        = str,
-    required    = True,
-    metavar     = "[Assets]",
-    # You'll probably want to separate them by commas when passed to a function.
-    help        = "List assets to be balanced."
-)
-# Add Amounts
-parse.add_argument(
-    "-$",
-    "--amounts",
-    action      = "append",
-    type        = int,
-    required    = True,
-    metavar     = "[Amounts]",
-    help        = "List amounts of each asset to be balanced"
-)
-
-# Add target allocation
-parse.add_argument(
-    "-%",
-    "--percentages",
-    action      = "append",
-    type        = int,
-    required    = True,
-    metavar     = "[Percentages]",
-    help        = "List desired percentages to rebalance into porfolio."
-)
-
-# Parse file if argument given. This will be more complicated & must use nargs
-parse.add_argument(
-    "-f",
-    "--file",
-    action      = "append",
-    type        = str,
-    required    = False,
-    metavar     = "[File]",
-    nargs       = "+",
-    help        = "Files and itemizes arguments given"
-)
-
-# Parse args
-parse.parse_args()
+# Parse args namespace & convert to dictionary
+args = vars(parse.parse_args())
 
 #
 ## End args
 #
 
-stocks = input('Enter ticker symbols:\n')
-
+# Loop through assets & get price
+stocks = args["assets"]
 def get_close_price(stocks):
-    stocks = stocks.split(', ')
-    df = web.av.quotes.AVQuotesReader(symbols=stocks, api_key=key)
-    print(df.read())
+    for stock in stocks:
+        df = web.av.quotes.AVQuotesReader(symbols=stock, api_key=key)
+        print(df.read())
+        df.close()
+    # Figure out syntax to get specific dataframe column, price
 
 if __name__ == "__main__":
     get_close_price(stocks)
