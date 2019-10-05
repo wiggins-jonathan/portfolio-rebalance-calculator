@@ -20,7 +20,7 @@ with open(secrets_file, 'r') as f:
 # Instantiate argparse object
 parse = argparse.ArgumentParser(
     description = 'Program to rebalance a securities portfolio.'
-    )
+)
 
 #
 ## Args
@@ -31,27 +31,28 @@ parse.add_argument(
     action      = "append",
     type        = str,
     required    = True,
-    metavar     = "[Assets]",
+    metavar     = "assets",
     nargs       = "+",
     help        = "List ticker number of assets to be balanced."
-                    " Separate multiple tickers by spaces"
+                  " Separate multiple tickers by spaces."
 )
 parse.add_argument(
     "-$", "--amounts",
     action      = "append",
-    type        = int,
+    type        = float,
     required    = True,
-    metavar     = "[Amounts]",
+    metavar     = "amounts",
     nargs       = "+",
-    help        = "List amounts of each asset to be balanced"
+    help        = "List amounts of each asset to be balanced."
+                  " Separate multiple amounts by spaces."
 )
 
 parse.add_argument(
     "-%", "--percentages",
     action      = "append",
-    type        = int,
+    type        = float,
     required    = True,
-    metavar     = "[Percentages]",
+    metavar     = "percentages",
     nargs       = "+",
     help        = "List desired percentages to rebalance into porfolio."
 )
@@ -62,17 +63,24 @@ parse.add_argument(
     action      = "append",
     type        = str,
     required    = False,
-    metavar     = "[File]",
-    help        = "A file with arguments to parse"
+    metavar     = "file",
+    help        = "A file with arguments to parse."
 )
 
 parse.add_argument(
     "-t", "--total",
     action      = "store",
-    type        = int,
+    type        = float,
     required    = True,
-    metavar     = "[Total]",
-    help        = "Total amount to be rebalanced."
+    metavar     = "total",
+    help        = "Total amount to be contributed."
+)
+
+parse.add_argument(
+    "-d", "--debug",
+    action      = "store_true",
+    required    = False,
+    help        = "Outputs important debugging info to stdout."
 )
 
 # Parse args namespace & convert to dictionary
@@ -82,14 +90,103 @@ args = vars(parse.parse_args())
 ## End args
 #
 
-# Loop through assets & get price
-stocks = args["assets"]
-def get_close_price(stocks):
+def main(args):
+    tickers = (args["assets"][0])
+
+    rounded_totals = _round_list(_get_final_totals(args), 2)
+    totals  = [str(i) for i in rounded_totals]
+
+    rounded_shares = _round_list(_get_share_amounts(args), 0)
+    shares  = [str(i) for i in rounded_shares]
+
+    match = "-"
+    for z, y, x in zip(shares, tickers, totals):
+        if match in x:
+            var = 'Sell'
+        else:
+            var = 'Buy'
+        print(f'{var} ${x} of {y} or about {z} share(s)')
+
+#
+## Helper Functions
+#
+
+def _get_share_price(args):
+    stocks  = args["assets"]
+
+    # Loop through assets & get current prices
     for stock in stocks:
-        df = web.av.quotes.AVQuotesReader(symbols=stock, api_key=key)
-        print(df.read())
-        df.close()
-    # Figure out syntax to get specific dataframe column, price
+        data = web.av.quotes.AVQuotesReader(symbols=stock, api_key=key)
+        df = (data.read())
+        prices = (df["price"].tolist())
+        data.close()
+        return(prices)
+
+def _get_share_amounts(args):
+    prices = _get_share_price(args)
+    totals = _get_final_totals(args)
+
+    share_amounts = [y / x for y, x in zip(totals, prices)]
+
+    return(share_amounts)
+
+def _get_amount_totals(args):
+    amount_args     = args["amounts"][0]
+    total = sum(amount_args)
+
+    return(total)
+
+def _get_actual_percentages(args):
+    percent_args = args["amounts"][0]
+    actual_percents = []
+
+    for percent in percent_args:
+        totals = 100 * (percent / _get_amount_totals(args))
+        actual_percents.append(totals)
+
+    return(actual_percents)
+
+def _get_target_percents(args):
+    desired = args["percentages"][0]
+    actual  = _get_actual_percentages(args)
+
+    diffs           = []
+    target_percents = []
+
+    diffs           = [y - x for y, x in zip(desired, actual)]
+    target_percents = [y + x for y, x in zip(diffs, desired)]
+
+    return(target_percents)
+
+def _get_final_totals(args):
+    total = args["total"]
+    targets = _get_target_percents(args)
+    final_totals = []
+
+    for target in targets:
+        final_total = (target * total) / 100
+        final_totals.append(final_total)
+
+    return(final_totals)
+
+def _round_list(list_to_round, sig_fig):
+    totals = list_to_round
+    rounded_totals = []
+
+    for total in totals:
+        rounded_total = round(total, sig_fig)
+        rounded_totals.append(rounded_total)
+
+    return(rounded_totals)
+
+def debug(string):
+    # Look into using logging module.
+    if args["debug"] == True:
+        print(string)
+
+#
+## End Helper Functions
+#
 
 if __name__ == "__main__":
-    get_close_price(stocks)
+    main(args)
