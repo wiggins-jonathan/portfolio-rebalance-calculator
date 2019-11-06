@@ -2,20 +2,13 @@
 
 import  yaml
 import  argparse
+import  logging
 import  pandas_datareader   as web
 from    pathlib import Path as path
 
 # Get paths
 rel_path        = path(__file__).parent
 secrets_file    = path(f'{rel_path}/secrets.yaml')
-
-# Get Alpha Vantage api key
-with open(secrets_file, 'r') as f:
-    try:
-        api = yaml.safe_load(f)
-        key = api['alpha_vantage']['api_key']
-    except yaml.YAMLError as yaml_error:
-        print(yaml_error)
 
 # Instantiate argparse object
 parse = argparse.ArgumentParser(
@@ -83,16 +76,33 @@ parse.add_argument(
     help        = "Outputs important debugging info to stdout."
 )
 
-# Parse args namespace & convert to dictionary
-args = vars(parse.parse_args())
+args = vars(parse.parse_args()) # Parse args namespace & convert to dictionary
 
 #
 ## End args
 #
 
+log = logging.getLogger(__name__)   # Instantiate logger object
+
+# Print debug statements to console if debug mode is on
+if args['debug'] == 1:
+    logging.basicConfig(
+        level   = logging.DEBUG,
+        format  = '%(levelname)s - %(message)s'
+    )
+
+# Get Alpha Vantage api key
+with open(secrets_file, 'r') as f:
+    try:
+        api = yaml.safe_load(f)
+        key = api['alpha_vantage']['api_key']
+    except yaml.YAMLError as yaml_error:
+        print(yaml_error)
+
 def main(args):
     tickers = (args["assets"][0])
 
+    log.debug('Rounding final totals to 2 significant figures...')
     rounded_totals = _round_list(_get_final_totals(args), 2)
     totals  = [str(i) for i in rounded_totals]
 
@@ -178,11 +188,6 @@ def _round_list(list_to_round, sig_fig):
         rounded_totals.append(rounded_total)
 
     return(rounded_totals)
-
-def debug(string):
-    # Look into using logging module.
-    if args["debug"] == True:
-        print(string)
 
 #
 ## End Helper Functions
