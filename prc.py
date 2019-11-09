@@ -103,15 +103,13 @@ def main(args):
     tickers = (args["assets"][0])
 
     log.debug('Rounding final totals to 2 significant figures...')
-    rounded_totals = _round_list(_get_final_totals(args), 2)
-    totals  = [str(i) for i in rounded_totals]
+    totals = _round_list(_get_final_totals(args),   2)
+    shares = _round_list(_get_share_amounts(args),  0)
 
-    rounded_shares = _round_list(_get_share_amounts(args), 0)
-    shares  = [str(i) for i in rounded_shares]
-
-    match = "-"
     for z, y, x in zip(shares, tickers, totals):
-        if match in x:
+        if x < 0:
+            x   = abs(x)
+            z   = abs(z)
             var = 'Sell'
         else:
             var = 'Buy'
