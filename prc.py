@@ -113,6 +113,7 @@ def main(args):
             var = 'Sell'
         else:
             var = 'Buy'
+
         print(f'{var} ${x} of {y} or about {z} share(s)')
 
 #
@@ -120,13 +121,13 @@ def main(args):
 #
 
 def _get_share_price(args):
-    stocks  = args["assets"]
+    stocks = args["assets"]
 
     # Loop through assets & get current prices
     for stock in stocks:
-        data = web.av.quotes.AVQuotesReader(symbols=stock, api_key=key)
-        df = (data.read())
-        prices = (df["price"].tolist())
+        data    = web.av.quotes.AVQuotesReader(symbols=stock, api_key=key)
+        df      = (data.read())
+        prices  = (df["price"].tolist())
         data.close()
         return(prices)
 
@@ -139,13 +140,13 @@ def _get_share_amounts(args):
     return(share_amounts)
 
 def _get_amount_totals(args):
-    amount_args     = args["amounts"][0]
-    total = sum(amount_args)
+    amount_args = args["amounts"][0]
+    total       = sum(amount_args)
 
     return(total)
 
 def _get_actual_percentages(args):
-    percent_args = args["amounts"][0]
+    percent_args    = args["amounts"][0]
     actual_percents = []
 
     for percent in percent_args:
@@ -167,8 +168,9 @@ def _get_target_percents(args):
     return(target_percents)
 
 def _get_final_totals(args):
-    total = args["total"]
+    total   = args["total"]
     targets = _get_target_percents(args)
+
     final_totals = []
 
     for target in targets:
@@ -179,6 +181,7 @@ def _get_final_totals(args):
 
 def _round_list(list_to_round, sig_fig):
     totals = list_to_round
+
     rounded_totals = []
 
     for total in totals:
