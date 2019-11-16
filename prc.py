@@ -10,86 +10,15 @@ from    pathlib import Path as path
 rel_path        = path(__file__).parent
 secrets_file    = path(f'{rel_path}/secrets.yaml')
 
-# Instantiate argparse object
-parse = argparse.ArgumentParser(
-    description = 'Program to rebalance a securities portfolio.'
-)
-
-#
-## Args
-#
-
-parse.add_argument(
-    "-a", "--assets",
-    action      = "append",
-    type        = str,
-    required    = True,
-    metavar     = "assets",
-    nargs       = "+",
-    help        = "List ticker number of assets to be balanced."
-                  " Separate multiple tickers by spaces."
-)
-parse.add_argument(
-    "-$", "--amounts",
-    action      = "append",
-    type        = float,
-    required    = True,
-    metavar     = "amounts",
-    nargs       = "+",
-    help        = "List amounts of each asset to be balanced."
-                  " Separate multiple amounts by spaces."
-)
-
-parse.add_argument(
-    "-%", "--percentages",
-    action      = "append",
-    type        = float,
-    required    = True,
-    metavar     = "percentages",
-    nargs       = "+",
-    help        = "List desired percentages to rebalance into porfolio."
-)
-
-# Parse file if argument given. This will be more complicated & will be done later
-parse.add_argument(
-    "-f", "--file",
-    action      = "append",
-    type        = str,
-    required    = False,
-    metavar     = "file",
-    help        = "A file with arguments to parse."
-)
-
-parse.add_argument(
-    "-t", "--total",
-    action      = "store",
-    type        = float,
-    required    = True,
-    metavar     = "total",
-    help        = "Total amount to be contributed."
-)
-
-parse.add_argument(
-    "-d", "--debug",
-    action      = "store_true",
-    required    = False,
-    help        = "Outputs important debugging info to stdout."
-)
-
-args = vars(parse.parse_args()) # Parse args namespace & convert to dictionary
-
-#
-## End args
-#
-
 log = logging.getLogger(__name__)   # Instantiate logger object
 
 # Print debug statements to console if debug mode is on
-if args['debug'] == 1:
-    logging.basicConfig(
-        level   = logging.DEBUG,
-        format  = '%(levelname)s - %(message)s'
-    )
+def _check_debug(args):
+    if args['debug'] == 1:
+        logging.basicConfig(
+            level   = logging.DEBUG,
+            format  = '%(levelname)s - %(message)s'
+        )
 
 # Get Alpha Vantage api key
 with open(secrets_file, 'r') as f:
@@ -99,7 +28,10 @@ with open(secrets_file, 'r') as f:
     except yaml.YAMLError as yaml_error:
         print(yaml_error)
 
-def main(args):
+def main():
+    args = _get_args()
+    _check_debug(args)
+
     tickers = (args["assets"][0])
 
     log.debug('Rounding final totals to 2 significant figures...')
@@ -118,6 +50,73 @@ def main(args):
 
 #
 ## Helper Functions
+#
+
+def _get_args():
+    # Instantiate argparse object
+    parse = argparse.ArgumentParser(
+        description = 'Program to rebalance a securities portfolio.'
+    )
+
+    parse.add_argument(
+        "-a", "--assets",
+        action      = "append",
+        type        = str,
+        required    = True,
+        metavar     = "assets",
+        nargs       = "+",
+        help        = "List ticker number of assets to be balanced."
+                      " Separate multiple tickers by spaces."
+    )
+    parse.add_argument(
+        "-$", "--amounts",
+        action      = "append",
+        type        = float,
+        required    = True,
+        metavar     = "amounts",
+        nargs       = "+",
+        help        = "List amounts of each asset to be balanced."
+                      " Separate multiple amounts by spaces."
+    )
+    parse.add_argument(
+        "-%", "--percentages",
+        action      = "append",
+        type        = float,
+        required    = True,
+        metavar     = "percentages",
+        nargs       = "+",
+        help        = "List desired percentages to rebalance into porfolio."
+    )
+    # Parse file if argument given. This will be more complicated & will be done later
+    parse.add_argument(
+        "-f", "--file",
+        action      = "append",
+        type        = str,
+        required    = False,
+        metavar     = "file",
+        help        = "A file with arguments to parse."
+    )
+    parse.add_argument(
+        "-t", "--total",
+        action      = "store",
+        type        = float,
+        required    = True,
+        metavar     = "total",
+        help        = "Total amount to be contributed."
+    )
+    parse.add_argument(
+        "-d", "--debug",
+        action      = "store_true",
+        required    = False,
+        help        = "Outputs important debugging info to stdout."
+    )
+
+    args = vars(parse.parse_args()) # Parse args namespace & convert to dictionary
+
+    return args
+
+#
+## Math functions
 #
 
 def _get_share_price(args):
@@ -195,4 +194,4 @@ def _round_list(list_to_round, sig_fig):
 #
 
 if __name__ == "__main__":
-    main(args)
+    main()
