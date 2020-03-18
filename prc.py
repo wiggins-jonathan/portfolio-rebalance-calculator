@@ -125,10 +125,15 @@ def _get_share_price(args):
     # Loop through assets & get current prices
     for stock in stocks:
         data    = web.av.quotes.AVQuotesReader(symbols=stock, api_key=key)
-        df      = (data.read())
-        prices  = (df["price"].tolist())
-        data.close()
-        return(prices)
+        try:
+            df      = (data.read())
+            prices  = (df["price"].tolist())
+            data.close()
+            return(prices)
+        except:
+            f = data.function
+            print(f'Alpha Vantage {f} returned an error. They may have changed their API.')
+            exit()
 
 def _get_share_amounts(args):
     prices = _get_share_price(args)
