@@ -1,32 +1,16 @@
 #!/usr/bin/env python
 
 import  arguments
-import  yaml
 import  logging
-import  pandas_datareader   as web
+import  sys
+import  pandas as pd
+import  yfinance as yf
 from    pathlib import Path as path
 
 # Get paths
 rel_path        = path(__file__).parent
-secrets_file    = path(f'{rel_path}/secrets.yaml')
 
 log = logging.getLogger(__name__)   # Instantiate logger object
-
-# Print debug statements to console if debug mode is on
-def _check_debug(args):
-    if args['debug'] == 1:
-        logging.basicConfig(
-            level   = logging.DEBUG,
-            format  = '%(levelname)s - %(message)s'
-        )
-
-# Get Alpha Vantage api key
-with open(secrets_file, 'r') as f:
-    try:
-        api = yaml.safe_load(f)
-        key = api['alpha_vantage']['api_key']
-    except yaml.YAMLError as yaml_error:
-        print(yaml_error)
 
 def main():
     args = arguments.get_args()
@@ -52,21 +36,38 @@ def main():
 ## Helper functions
 #
 
+# Print debug statements to console if debug mode is on
+def _check_debug(args):
+    if args['debug'] == 1:
+        logging.basicConfig(
+            level   = logging.DEBUG,
+            format  = '%(levelname)s - %(message)s'
+        )
+
 def _get_share_price(args):
     stocks = args["assets"]
 
-    # Loop through assets & get current prices
-    for stock in stocks:
-        data    = web.av.quotes.AVQuotesReader(symbols=stock, api_key=key)
-        try:
-            df      = (data.read())
-            prices  = (df["price"].tolist())
-            data.close()
-            return(prices)
-        except:
-            f = data.function
-            print(f'Alpha Vantage {f} returned an error. They may have changed their API.')
-            exit()
+    # yf.download expects a white space separated string of tickers
+    tickers = " ".join(stocks[0])
+    try:
+        df = yf.download(
+            tickers,
+            period      = "1d",
+            auto_adjust = True,
+            progress    = False,
+            threads     = True
+        )
+
+        prices = []
+        for stock in stocks[0]:
+            prices.append(df["Close"][stock][0])
+
+        log.debug(f'Successfully retrieved closing prices from yahoo finance {prices}')
+
+        return(prices)
+    except:
+        print("Downloading data using yfinance failed. They probably changed their API.")
+        sys.exit(1)
 
 def _get_share_amounts(args):
     prices = _get_share_price(args)
