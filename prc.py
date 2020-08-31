@@ -3,12 +3,8 @@
 import  arguments
 import  logging
 import  sys
-import  pandas as pd
 import  yfinance as yf
 from    pathlib import Path as path
-
-# Get paths
-rel_path        = path(__file__).parent
 
 log = logging.getLogger(__name__)   # Instantiate logger object
 
