@@ -24,7 +24,7 @@ class Ticker:
                     threads     = True      # Multi-thread download of ticker
                     )
 
-            self.price = df["Close"][0]
+            self.price = df["Close"][0] # Grab closing price out of data frame
 
             log.debug(f'Closing price for {self.name} is {self.price}.')
         except:
@@ -50,6 +50,7 @@ class Ticker:
         log.debug(f'Need to buy {self.sharesToBuy} shares of {self.name} to equal desired portfolio.')
         return self.sharesToBuy
 
+# Print debug statements to stdout if debug mode is on.
 def _check_debug(args):
     if args['debug'] == 1:
         logging.basicConfig(
@@ -76,15 +77,13 @@ def main():
         sharesToBuy     = round(sharesToBuy, 2)
         amountToChange  = round(t.amountToChange, 2)
 
-        # Display if we should buy or sell
+        # If amount is negative we need to sell, not buy
+        var = "Buy"
         if sharesToBuy < 0:
             sharesToBuy = abs(sharesToBuy)
             var = "Sell"
-        else:
-            var = "Buy"
+
         print(f'{var} ${amountToChange} of {t.name} or about {sharesToBuy} shares')
-
-
 
 if __name__ == "__main__":
     main()
