@@ -13,9 +13,8 @@ def get_args():
         required    = True,
         metavar     = "assets",
         nargs       = "+",
-        help        = "List ticker number of assets to be balanced."
-                      " Separate multiple tickers by spaces."
-    )
+        help        = "Tickers to be balanced. Separate multiple tickers by spaces."
+        )
     parse.add_argument(
         "-$", "--amounts",
         action      = "append",
@@ -23,18 +22,19 @@ def get_args():
         required    = True,
         metavar     = "amounts",
         nargs       = "+",
-        help        = "List amounts of each asset to be balanced."
-                      " Separate multiple amounts by spaces."
-    )
+        help        = "Total amount of each asset in your portfolio. "
+                      "Separate multiple amounts by spaces."
+        )
     parse.add_argument(
-        "-%", "--percentages",
+        "-%", "--percents",
         action      = "append",
         type        = float,
         required    = True,
-        metavar     = "percentages",
+        metavar     = "percents",
         nargs       = "+",
-        help        = "List desired percentages to rebalance into porfolio."
-    )
+        help        = "Desired percentage of each asset in your portfolio. "
+                      "Separate multiple percents by spaces."
+        )
     # Parse file if argument given. This will be more complicated & will be done later
     parse.add_argument(
         "-f", "--file",
@@ -43,21 +43,22 @@ def get_args():
         required    = False,
         metavar     = "file",
         help        = "A file with arguments to parse."
-    )
+        )
     parse.add_argument(
         "-t", "--total",
         action      = "store",
         type        = float,
         required    = True,
         metavar     = "total",
-        help        = "Total amount to be contributed."
-    )
+        help        = "Any additional cash amount you are contributing not "
+                      "already part of your portfolio."
+        )
     parse.add_argument(
         "-d", "--debug",
         action      = "store_true",
         required    = False,
         help        = "Outputs important debugging info to stdout."
-    )
+        )
 
     args = vars(parse.parse_args()) # Parse args namespace & convert to dictionary
 
