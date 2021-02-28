@@ -15,11 +15,8 @@ def get_args():
 
     # Parse file if argument given. This will be more complicated & will be done later
     parse.add_argument(
-        "-f", "--file",
-        action      = "append",
-        type        = str,
-        required    = False,
-        metavar     = "file",
+        "file",
+        nargs       = '?',
         help        = "A file with arguments to parse."
         )
 
