@@ -9,10 +9,8 @@ import  yfinance as yf
 log = logging.getLogger(__name__)   # Instantiate logger object
 
 class Ticker:
-    def __init__(self, name, amount, desiredPercent):
-        self.name           = name
-        self.amount         = amount
-        self.desiredPercent = desiredPercent
+    def __init__(self, name):
+        self.name = name
 
         # Get today's closing price
         try:
@@ -34,7 +32,9 @@ class Ticker:
 
     # I think we can have a doMath function that will take in anonymous functions (lambda),
     # register the answer with the Ticker object, & also return the answer
-    def sharesToBuy(self, sum_amounts, cash_addition):
+    def sharesToBuy(self, amount, desiredPercent, sum_amounts, cash_addition):
+        self.amount         = amount
+        self.desiredPercent = desiredPercent
         self.actualPercent  = (self.amount / sum_amounts) * 100
         log.debug(f'{self.name} is {self.actualPercent}% of total portfolio.')
 
@@ -101,8 +101,8 @@ def main():
 
     # Instantiate all ticker objects
     for i in range(len(tickers)):
-        t           = Ticker(tickers[i], amounts[i], percents[i])
-        sharesToBuy = t.sharesToBuy(sum_amounts, total)
+        t           = Ticker(tickers[i])
+        sharesToBuy = t.sharesToBuy(amounts[i], percents[i], sum_amounts, total)
 
         # Round share & dollar amounts to 2 sig figs
         sharesToBuy     = round(sharesToBuy, 2)
