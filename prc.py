@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import  arguments
+import  ingest
 import  logging
 import  sys
 import  yfinance as yf
@@ -8,10 +9,8 @@ import  yfinance as yf
 log = logging.getLogger(__name__)   # Instantiate logger object
 
 class Ticker:
-    def __init__(self, name, amount, desiredPercent):
-        self.name           = name
-        self.amount         = amount
-        self.desiredPercent = desiredPercent
+    def __init__(self, name):
+        self.name = name
 
         # Get today's closing price
         try:
@@ -33,7 +32,9 @@ class Ticker:
 
     # I think we can have a doMath function that will take in anonymous functions (lambda),
     # register the answer with the Ticker object, & also return the answer
-    def sharesToBuy(self, sum_amounts, cash_addition):
+    def sharesToBuy(self, amount, desiredPercent, sum_amounts, cash_addition):
+        self.amount         = amount
+        self.desiredPercent = desiredPercent
         self.actualPercent  = (self.amount / sum_amounts) * 100
         log.debug(f'{self.name} is {self.actualPercent}% of total portfolio.')
 
@@ -70,24 +71,38 @@ def main():
     args = arguments.get_args()
     _check_debug(args)
 
-    tickers = list(readInput('Enter ticker symbols -> '))
+    tickers, amounts, percents = [], [], []
+    if args['file']:    # If there is a file
+        yamlData = ingest.parseYaml(args['file'])
 
-    amounts, percents = [], []
-    for ticker in tickers:
-        prompt = f'Enter current amount in portfolio for {ticker} -> '
-        amounts.append(float(input(prompt)))
+        # We might want to revisit the names of these variables
+        total = 0
+        for key in yamlData:
+            if key == 'total':
+                total = yamlData['total']
+                continue
+            tickers.append(key)
+            amounts.append(yamlData[key]['current'])
+            percents.append(yamlData[key]['desired'])
+    else:               # No file. Run prompt
+        tickers = list(readInput('Enter ticker symbols -> '))
 
-        prompt = f'Enter desired percentage of {ticker} in portfolio -> '
-        percents.append(float(input(prompt)))
+        for ticker in tickers:
+            prompt = f'Enter current amount in portfolio for {ticker} -> '
+            amounts.append(float(input(prompt)))
+
+            prompt = f'Enter desired percentage of {ticker} in portfolio -> '
+            percents.append(float(input(prompt)))
+
+
+        total = float(input('Enter total amount being contributed to porfolio -> '))
 
     sum_amounts = sum(amounts)
 
-    total = float(input('Enter total amount being contributed to porfolio -> '))
-
     # Instantiate all ticker objects
     for i in range(len(tickers)):
-        t           = Ticker(tickers[i], amounts[i], percents[i])
-        sharesToBuy = t.sharesToBuy(sum_amounts, total)
+        t           = Ticker(tickers[i])
+        sharesToBuy = t.sharesToBuy(amounts[i], percents[i], sum_amounts, total)
 
         # Round share & dollar amounts to 2 sig figs
         sharesToBuy     = round(sharesToBuy, 2)
