@@ -51,9 +51,10 @@ class Ticker:
         log.debug(f'Need to buy {self.sharesToBuy} shares of {self.name} to equal desired portfolio.')
         return self.sharesToBuy
 
-# Print debug statements to stdout if debug mode is on.
-def _check_debug(args):
-    if args['debug'] == 1:
+def main():
+    args = arguments.get_args()
+
+    if args['debug'] == 1:  # Print debug to stdout if debug mode is on.
         logging.basicConfig(
             level   = logging.DEBUG,
             format  = '%(levelname)s - %(message)s'
