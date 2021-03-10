@@ -51,58 +51,41 @@ class Ticker:
         log.debug(f'Need to buy {self.sharesToBuy} shares of {self.name} to equal desired portfolio.')
         return self.sharesToBuy
 
-# Print debug statements to stdout if debug mode is on.
-def _check_debug(args):
-    if args['debug'] == 1:
+def main():
+    args = arguments.get_args()
+
+    if args['debug'] == 1:  # Print debug to stdout if debug mode is on.
         logging.basicConfig(
             level   = logging.DEBUG,
             format  = '%(levelname)s - %(message)s'
         )
 
-# Reads input continuously until no input received.
-# Returns a generator for each input loop
-def readInput(prompt):
-    x = input(prompt)
-    while x:
-        yield x
-        x = input(prompt)
-
-def main():
-    args = arguments.get_args()
-    _check_debug(args)
-
-    tickers, amounts, percents = [], [], []
-    if args['file']:    # If there is a file
-        yamlData = ingest.parseYaml(args['file'])
-
-        # We might want to revisit the names of these variables
-        total = 0
-        for key in yamlData:
-            if key == 'total':
-                total = yamlData['total']
-                continue
-            tickers.append(key)
-            amounts.append(yamlData[key]['current'])
-            percents.append(yamlData[key]['desired'])
-    else:               # No file. Run prompt
-        tickers = list(readInput('Enter ticker symbols -> '))
-
-        for ticker in tickers:
-            prompt = f'Enter current amount in portfolio for {ticker} -> '
-            amounts.append(float(input(prompt)))
-
-            prompt = f'Enter desired percentage of {ticker} in portfolio -> '
-            percents.append(float(input(prompt)))
-
-
-        total = float(input('Enter total amount being contributed to porfolio -> '))
-
-    sum_amounts = sum(amounts)
+    if args['file']:
+        data = ingest.parseYaml(args['file'])
+        log.debug(f"Data from {args['file']} is {data}")
+    else:
+        data = promptUser()
+        log.debug(f"Data from user input is {data}")
 
     # Instantiate all ticker objects
-    for i in range(len(tickers)):
-        t           = Ticker(tickers[i])
-        sharesToBuy = t.sharesToBuy(amounts[i], percents[i], sum_amounts, total)
+    total       = 0
+    sum_amounts = 0
+    for ticker in data:
+        if ticker == 'total':
+            total = data[ticker]
+            continue
+        sum_amounts += (data[ticker]['current'])
+    for ticker in data:
+        if ticker == 'total':
+            total = data[ticker]
+            continue
+        t           = Ticker(ticker)
+        sharesToBuy = t.sharesToBuy(
+                data[ticker]['current'],
+                data[ticker]['desired'],
+                sum_amounts,
+                total
+                )
 
         # Round share & dollar amounts to 2 sig figs
         sharesToBuy     = round(sharesToBuy, 2)
@@ -115,6 +98,32 @@ def main():
             var = 'Sell'
 
         print(f'{var} ${amountToChange} of {t.name} or about {sharesToBuy} shares')
+
+def promptUser():
+    '''Gets input from user. Returns that input in a dictionary'''
+    def readInput(prompt):
+        '''Reads input continuously until no input received.'''
+        '''Returns a generator for each input loop'''
+        x = input(prompt)
+        while x:
+            yield x
+            x = input(prompt)
+
+    tickers = list(readInput('Enter ticker symbols -> '))
+    data    = dict.fromkeys(tickers)
+    for ticker in data:
+        data[ticker] = dict.fromkeys(['current', 'desired'])
+
+        prompt = f'Enter current amount in portfolio for {ticker} -> '
+        data[ticker]['current'] = float(input(prompt))
+
+        prompt = f'Enter desired percentage of {ticker} in portfolio -> '
+        data[ticker]['desired'] = float(input(prompt))
+
+    prompt = f'Enter total amount being contributed to porfolio -> '
+    data['total'] = float(input(prompt))
+
+    return data
 
 if __name__ == '__main__':
     main()
