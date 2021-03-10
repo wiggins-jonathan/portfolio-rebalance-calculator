@@ -10,14 +10,14 @@ def get_args():
         "-d", "--debug",
         action      = "store_true",
         required    = False,
-        help        = "Outputs important debugging info to stdout."
+        help        = "Outputs debugging info to stdout."
         )
 
     # Parse file if argument given. This will be more complicated & will be done later
     parse.add_argument(
         "file",
         nargs       = '?',
-        help        = "A file with arguments to parse."
+        help        = "A file to parse. Currently supports yaml."
         )
 
     args = vars(parse.parse_args()) # Parse args namespace & convert to dictionary
