@@ -30,18 +30,40 @@ class Ticker:
             print('Downloading data using yfinance failed.')
             sys.exit(1)
 
+    @property
+    def current(self):
+        return self._current
+    @current.setter
+    def current(self, value):
+        if value < 0:
+            print(f'The current value of {self.name} in your portfolio cannot '
+                'be less than 0')
+            sys.exit(1)
+        else:
+            self._current = value
+
+    @property
+    def desired(self):
+        return self._desired
+    @desired.setter
+    def desired(self, value):
+        if value < 0 or value > 100:
+            print(f'The desired percentage of {self.name} in your portfolio '
+            'cannot be less than 0% greater than 100%')
+            sys.exit(1)
+        else:
+            self._desired = value
+
     # I think we can have a doMath function that will take in anonymous functions (lambda),
     # register the answer with the Ticker object, & also return the answer
-    def sharesToBuy(self, amount, desiredPercent, sum_amounts, cash_addition):
-        self.amount         = amount
-        self.desiredPercent = desiredPercent
-        self.actualPercent  = (self.amount / sum_amounts) * 100
+    def sharesToBuy(self, sum_amounts, cash_addition):
+        self.actualPercent  = (self.current / sum_amounts) * 100
         log.debug(f'{self.name} is {self.actualPercent}% of total portfolio.')
 
-        self.percentDiff    = self.desiredPercent - self.actualPercent
+        self.percentDiff    = self.desired - self.actualPercent
         log.debug(f'Percent difference from desired percent is {self.percentDiff}%')
 
-        self.targetPercent  = self.percentDiff + self.desiredPercent
+        self.targetPercent  = self.percentDiff + self.desired
         log.debug(f'Percent of cash addition to add to equal desired percent is {self.targetPercent}%')
 
         self.amountToChange = (self.targetPercent * cash_addition) / 100
@@ -67,29 +89,37 @@ def main():
         data = promptUser()
         log.debug(f"Data from user input is {data}")
 
-    # Instantiate all ticker objects
-    total       = 0
-    sum_amounts = 0
+    total, sum_amounts, sum_percents = 0, 0, 0
+    objects         = []
     for ticker in data:
         if ticker == 'total':
             total = data[ticker]
             continue
-        sum_amounts += (data[ticker]['current'])
-    for ticker in data:
-        if ticker == 'total':
-            total = data[ticker]
-            continue
-        t           = Ticker(ticker)
-        sharesToBuy = t.sharesToBuy(
-                data[ticker]['current'],
-                data[ticker]['desired'],
-                sum_amounts,
-                total
-                )
+
+        sum_amounts     += (data[ticker]['current'])
+        sum_percents    += (data[ticker]['desired'])
+
+        t = Ticker(ticker)
+        t.current = data[ticker]['current']
+        t.desired = data[ticker]['desired']
+        objects.append(t)
+
+    # Validate inputs
+    if sum_amounts < 0:
+        print(f'The sum of all amounts cannot be less than 0')
+        sys.exit(1)
+    if sum_percents != 100:
+        print(f'The desired percents of all tickers in your portfolio must add '
+            'up to 100%')
+        sys.exit(1)
+
+    # Calculate shares to buy
+    for ticker in objects:
+        sharesToBuy = ticker.sharesToBuy(sum_amounts, total)
 
         # Round share & dollar amounts to 2 sig figs
         sharesToBuy     = round(sharesToBuy, 2)
-        amountToChange  = round(t.amountToChange, 2)
+        amountToChange  = round(ticker.amountToChange, 2)
 
         # If amount is negative we need to sell, not buy
         var = 'Buy'
@@ -97,7 +127,7 @@ def main():
             sharesToBuy = abs(sharesToBuy)
             var = 'Sell'
 
-        print(f'{var} ${amountToChange} of {t.name} or about {sharesToBuy} shares')
+        print(f'{var} ${amountToChange} of {ticker.name} or about {sharesToBuy} shares')
 
 def promptUser():
     '''Gets input from user. Returns that input in a dictionary'''
