@@ -73,6 +73,13 @@ class Ticker:
         log.debug(f'Need to buy {self.sharesToBuy} shares of {self.name} to equal desired portfolio.')
         return self.sharesToBuy
 
+def convertToFloat(value):
+    try:
+        return float(value)
+    except:
+        print("The value you just entered must be a number")
+        sys.exit(1)
+
 def main():
     args = arguments.get_args()
 
@@ -145,13 +152,13 @@ def promptUser():
         data[ticker] = dict.fromkeys(['current', 'desired'])
 
         prompt = f'Enter current amount in portfolio for {ticker} -> '
-        data[ticker]['current'] = float(input(prompt))
+        data[ticker]['current'] = convertToFloat(input(prompt))
 
         prompt = f'Enter desired percentage of {ticker} in portfolio -> '
-        data[ticker]['desired'] = float(input(prompt))
+        data[ticker]['desired'] = convertToFloat(input(prompt))
 
     prompt = f'Enter total amount being contributed to porfolio -> '
-    data['total'] = float(input(prompt))
+    data['total'] = convertToFloat(input(prompt))
 
     return data
 
