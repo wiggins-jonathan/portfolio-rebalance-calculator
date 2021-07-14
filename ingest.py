@@ -1,4 +1,4 @@
-import yaml
+import yaml # pyyaml
 
 def parseYaml(file):
     with open(file) as f:
