@@ -89,11 +89,11 @@ def main():
         data = promptUser()
         log.debug(f"Data from user input is {data}")
 
-    total, sum_amounts, sum_percents = 0, 0, 0
+    addition, sum_amounts, sum_percents = 0, 0, 0
     objects         = []
     for ticker in data:
-        if ticker == 'total':
-            total = data[ticker]
+        if ticker == 'addition':
+            addition = data[ticker]
             continue
 
         sum_amounts     += (data[ticker]['current'])
@@ -115,7 +115,7 @@ def main():
 
     # Calculate shares to buy
     for ticker in objects:
-        sharesToBuy = ticker.sharesToBuy(sum_amounts, total)
+        sharesToBuy = ticker.sharesToBuy(sum_amounts, addition)
 
         # Round share & dollar amounts to 2 sig figs
         sharesToBuy     = round(sharesToBuy, 2)
@@ -150,8 +150,8 @@ def promptUser():
         prompt = f'Enter desired percentage of {ticker} in portfolio -> '
         data[ticker]['desired'] = convertToFloat(input(prompt))
 
-    prompt = f'Enter total amount being contributed to porfolio -> '
-    data['total'] = convertToFloat(input(prompt))
+    prompt = f'Enter amount being contributed to porfolio -> '
+    data['addition'] = convertToFloat(input(prompt))
 
     return data
 
