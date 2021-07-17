@@ -73,13 +73,6 @@ class Ticker:
         log.debug(f'Need to buy {self.sharesToBuy} shares of {self.name} to equal desired portfolio.')
         return self.sharesToBuy
 
-def convertToFloat(value):
-    try:
-        return float(value)
-    except:
-        print("The value you just entered must be a number")
-        sys.exit(1)
-
 def main():
     args = arguments.get_args()
 
@@ -161,6 +154,14 @@ def promptUser():
     data['total'] = convertToFloat(input(prompt))
 
     return data
+
+def convertToFloat(value):
+    """Attempts to convert user input to a floating point number."""
+    try:
+        return float(value)
+    except:
+        print("The value you just entered must be a number")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
